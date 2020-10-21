@@ -158,7 +158,6 @@ void failSafe()
 
 void runtimeFailSafe()
 {
-  WiFiPriority=false;
   Serial.println("");
   Serial.println("Attempting runtime failsafe...");
   Serial.println("");
