@@ -24,7 +24,7 @@ void setup()
 {
   pinMode(buzzer, OUTPUT);
   digitalWrite(buzzer, LOW);
-  
+
   for(int i=0; i<6; i++)
   {
     pinMode(relay[i], OUTPUT);
@@ -48,7 +48,7 @@ void setup()
   Serial.println("v1.2");
   Serial.println("MAC: " + String(WiFi.macAddress()));
 
-  //Serial1.begin(9600, SERIAL_8N1, U1RX, U1TX);
+  Serial1.begin(9600, SERIAL_8N1, U1RX, U1TX);
 
   if(!initSys())
   {
@@ -88,11 +88,6 @@ void loop()
   digitalWrite(pwrRelay, pwrRelayStatus);
   Serial.println("PR: "+ String(pwrRelayStatus));
 
-  /*
-  digitalWrite(buzzer, blink);
-  */
-  delay(200);
-
   if(Serial1.available())
   {
     String s1dat=Serial1.readString();
@@ -124,10 +119,18 @@ bool initSys()
 
 void loadParameters()
 {
-  //read values from ROM
+  //ideally read values from ROM
 
   ssid="fallback";
   pwd="fallback";
+  WiFiPriority=true;
+  relayStatus[0]=0;
+  relayStatus[1]=0;
+  relayStatus[2]=0;
+  relayStatus[3]=0;
+  relayStatus[4]=0;
+  relayStatus[5]=0;
+  pwrRelayStatus=0;
 }
 
 bool connectWiFi()
