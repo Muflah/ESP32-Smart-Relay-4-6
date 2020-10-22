@@ -6,29 +6,25 @@
 const char* defaultSSID="fallback";
 const char* defaultPWD="fallback";
 
-char* ssid="fallback";
-char* pwd="fallback";
+char* ssid="";
+char* pwd="";
 
 const int relay[6]={12, 13, 14, 25, 26, 27};
 const int pwrRelay=15;
 const int inp[4]={32, 33, 34, 35};
 const int buzzer=5;
 
+bool relayStatus[6]={0, 0, 0, 0, 0, 0};
+bool pwrRelayStatus=0;
+
 bool sysStatus=false;
 bool WiFiPriority=true;
 
 void setup()
 {
-  Serial.begin(115200);
-  delay(100);
-  Serial.println("");
-  Serial.println("");
-  Serial.println("Online!");
-  Serial.println("v1.2");
-  Serial.println("MAC: " + String(WiFi.macAddress()));
-
-  //Serial1.begin(9600, SERIAL_8N1, U1RX, U1TX);
-
+  pinMode(buzzer, OUTPUT);
+  digitalWrite(buzzer, LOW);
+  
   for(int i=0; i<6; i++)
   {
     pinMode(relay[i], OUTPUT);
@@ -43,8 +39,16 @@ void setup()
     pinMode(inp[i], INPUT);
   }
 
-  pinMode(buzzer, OUTPUT);
-  digitalWrite(buzzer, LOW);
+  Serial.begin(115200);
+  Serial.setDebugOutput(true);
+  delay(100);
+  Serial.println("");
+  Serial.println("");
+  Serial.println("Online!");
+  Serial.println("v1.2");
+  Serial.println("MAC: " + String(WiFi.macAddress()));
+
+  //Serial1.begin(9600, SERIAL_8N1, U1RX, U1TX);
 
   if(!initSys())
   {
@@ -54,34 +58,39 @@ void setup()
   {
     Serial.println("System booted sucessfully.");
   }
+  digitalWrite(buzzer, HIGH);
+  delay(300);
+  digitalWrite(buzzer, LOW);
 }
 
-bool blink=false;
 void loop()
 {
   sysStatus=checkSysStatus();
 
-  Serial.println("System status: "+ String(sysStatus));
+  Serial.println("\n\nSystem status: "+ String(sysStatus) +"\n");
 
   if(!sysStatus)
   {
-    runtimeFailSafe();
+    failSafe();
   }
 
-  blink=!blink;
   for(int i=0; i<4; i++)
   {
-    if(digitalRead(inp[i]))
-    {
-      Serial.println("Input on inp" + String(i) +".");
-    }
+    Serial.println("IN" + String(i)+ ": "+ String(digitalRead(inp[i])));
   }
+
   for(int i=0; i<6; i++)
   {
-    digitalWrite(relay[i], blink);
+    digitalWrite(relay[i], relayStatus[i]);
+    Serial.println("OUT"+ String(i)+ ": "+ String(relayStatus[i]));
   }
-  digitalWrite(pwrRelay, blink);
+
+  digitalWrite(pwrRelay, pwrRelayStatus);
+  Serial.println("PR: "+ String(pwrRelayStatus));
+
+  /*
   digitalWrite(buzzer, blink);
+  */
   delay(200);
 
   if(Serial1.available())
@@ -117,8 +126,8 @@ void loadParameters()
 {
   //read values from ROM
 
-  ssid="abc";
-  pwd="pwd";
+  ssid="fallback";
+  pwd="fallback";
 }
 
 bool connectWiFi()
@@ -154,15 +163,11 @@ bool connectWiFi()
 
 void failSafe()
 {
+  digitalWrite(buzzer, HIGH);
+  delay(300);
+  digitalWrite(buzzer, LOW);
   Serial.println("");
   Serial.println("Attempting failsafe...");
-  Serial.println("");
-}
-
-void runtimeFailSafe()
-{
-  Serial.println("");
-  Serial.println("Attempting runtime failsafe...");
   Serial.println("");
 }
 
