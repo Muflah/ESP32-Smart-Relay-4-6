@@ -3,7 +3,11 @@
 #define U1TX 2
 #define U1RX 4
 
-String defaultSSID="fallback", defaultPWD="fallback";
+const char* defaultSSID="fallback";
+const char* defaultPWD="fallback";
+
+char* ssid="fallback";
+char* pwd="fallback";
 
 const int relay[6]={12, 13, 14, 25, 26, 27};
 const int pwrRelay=15;
@@ -23,7 +27,7 @@ void setup()
   Serial.println("v1.2");
   Serial.println("MAC: " + String(WiFi.macAddress()));
 
-  Serial1.begin(9600, SERIAL_8N1, U1RX, U1TX);
+  //Serial1.begin(9600, SERIAL_8N1, U1RX, U1TX);
 
   for(int i=0; i<6; i++)
   {
@@ -55,19 +59,15 @@ void setup()
 bool blink=false;
 void loop()
 {
+  sysStatus=checkSysStatus();
+
+  Serial.println("System status: "+ String(sysStatus));
+
   if(!sysStatus)
   {
     runtimeFailSafe();
   }
-  if(WiFi.status() != WL_CONNECTED && WiFiPriority)
-  {
-    Serial.println("WiFi lost or not found.");
-    sysStatus=connectWiFi();
-  }
-  else
-  {
-    sysStatus=true;
-  }
+
   blink=!blink;
   for(int i=0; i<4; i++)
   {
@@ -86,13 +86,13 @@ void loop()
 
   if(Serial1.available())
   {
-    String abc=Serial1.readString();
-    Serial.println(abc);
+    String s1dat=Serial1.readString();
+    Serial.println(s1dat);
   }
   if(Serial.available())
   {
-    String abc=Serial.readString();
-    Serial1.println(abc);
+    String s0dat=Serial.readString();
+    Serial1.println(s0dat);
   }
 }
 
@@ -116,11 +116,14 @@ bool initSys()
 void loadParameters()
 {
   //read values from ROM
+
+  ssid="abc";
+  pwd="pwd";
 }
 
 bool connectWiFi()
 {
-  WiFi.begin("DESKTOP-U6C56CM 3446", "abcd1234");
+  WiFi.begin(ssid, pwd);
   int attempt=0;
 
   Serial.println("");
@@ -161,4 +164,37 @@ void runtimeFailSafe()
   Serial.println("");
   Serial.println("Attempting runtime failsafe...");
   Serial.println("");
+}
+
+bool checkSysStatus()
+{
+  bool sysStatus=false;
+  if(WiFi.status() != WL_CONNECTED && WiFiPriority)
+  {
+    Serial.println("WiFi lost or not found.");
+    Serial.print("Searching for default network");
+
+    for(int i=0; i<3; i++)
+    {
+      int attempt=0;
+      WiFi.begin(defaultSSID, defaultPWD);
+      while (WiFi.status() != WL_CONNECTED && attempt<3)
+      {
+        attempt++;
+        delay(300);
+        Serial.print(".");
+      }
+    }
+    Serial.println("");
+  }
+
+  if(WiFi.status() != WL_CONNECTED && WiFiPriority)
+  {
+    sysStatus=false;
+  }
+  else
+  {
+    sysStatus=true;
+  }
+  return sysStatus;
 }
