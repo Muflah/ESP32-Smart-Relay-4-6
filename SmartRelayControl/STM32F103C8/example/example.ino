@@ -28,6 +28,10 @@ void setup() {
   display.print("Online!\nSTM32F103C8");
   //display.setCursor(0,0);
   display.display(); // actually display all of the above
+
+  delay(500);
+  display.clearDisplay();
+  display.display();
 }
 
 void loop()
