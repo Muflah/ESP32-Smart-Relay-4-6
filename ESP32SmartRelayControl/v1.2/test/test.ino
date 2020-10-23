@@ -17,8 +17,7 @@ const int buzzer=5;
 bool relayStatus[6]={0, 0, 0, 0, 0, 0};
 bool pwrRelayStatus=0;
 
-bool sysStatus=false;
-bool WiFiPriority=true;
+bool WiFiPriority=false;
 
 void setup()
 {
@@ -65,15 +64,6 @@ void setup()
 
 void loop()
 {
-  sysStatus=checkSysStatus();
-
-  Serial.println("\n\nSystem status: "+ String(sysStatus) +"\n");
-
-  if(!sysStatus)
-  {
-    failSafe();
-  }
-
   for(int i=0; i<4; i++)
   {
     Serial.println("IN" + String(i)+ ": "+ String(digitalRead(inp[i])));
@@ -102,6 +92,7 @@ void loop()
 
 bool initSys()
 {
+  bool sysStatus=false;
   loadParameters();
   for(int i=0; i<3 && !sysStatus; i++)
   {
@@ -172,37 +163,4 @@ void failSafe()
   Serial.println("");
   Serial.println("Attempting failsafe...");
   Serial.println("");
-}
-
-bool checkSysStatus()
-{
-  bool sysStatus=false;
-  if(WiFi.status() != WL_CONNECTED && WiFiPriority)
-  {
-    Serial.println("WiFi lost or not found.");
-    Serial.print("Searching for default network");
-
-    for(int i=0; i<3; i++)
-    {
-      int attempt=0;
-      WiFi.begin(defaultSSID, defaultPWD);
-      while (WiFi.status() != WL_CONNECTED && attempt<3)
-      {
-        attempt++;
-        delay(300);
-        Serial.print(".");
-      }
-    }
-    Serial.println("");
-  }
-
-  if(WiFi.status() != WL_CONNECTED && WiFiPriority)
-  {
-    sysStatus=false;
-  }
-  else
-  {
-    sysStatus=true;
-  }
-  return sysStatus;
 }
