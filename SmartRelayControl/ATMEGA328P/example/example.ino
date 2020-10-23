@@ -5,13 +5,15 @@
 
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 
+String readBT="";
+
 void setup()
 {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.display();
   delay(300);
 
-  Serial.begin(9600); //for HM-11
+  Serial.begin(9600); //for BLE module
 
   display.clearDisplay();
   display.display();
@@ -34,7 +36,7 @@ void loop()
 {
   if(Serial.available())
   {
-    String readBT=Serial.readString();
+    readBT=Serial.readString();
     display.clearDisplay();
     display.setCursor(0,0);
     display.println(readBT);
