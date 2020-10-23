@@ -3,9 +3,13 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+const int inp[4]={};
+
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 
-void setup() {
+void setup()
+{
+  //afio_cfg_debug_ports(AFIO_DEBUG_NONE);
   Serial.begin(9600);
 
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
